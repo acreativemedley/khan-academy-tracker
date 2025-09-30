@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { Container, Typography, Box } from '@mui/material'
+import DatabaseTest from './components/DatabaseTest'
 
 // Create Material-UI theme
 const theme = createTheme({
@@ -31,6 +32,7 @@ const Dashboard = () => (
     <Typography variant="body2">
       🎯 Target completion: May 30, 2026
     </Typography>
+    <DatabaseTest />
   </Box>
 )
 
