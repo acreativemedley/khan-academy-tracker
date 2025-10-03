@@ -31,9 +31,8 @@
 - **Non-School Days:** Tuesday, Wednesday (no assignments)
 - **Holiday Handling:** Thanksgiving, Christmas, New Year (configurable)
 - **Special Days:**
-  - Unit exams as sole daily activity
-  - Review days scheduled before exams
-  - Vacation days (configurable)
+  - Unit exams as sole daily activity for that course
+   - Vacation days (configurable)
 
 #### Progress & Analytics
 - **Completion Tracking:** Checkbox-based activity completion
@@ -47,8 +46,14 @@
 - **Frontend:** React.js with modern UI framework (Material-UI or Tailwind CSS)
 - **Backend:** Supabase (PostgreSQL database + Auth + Real-time subscriptions)
 - **Deployment:** Netlify with continuous deployment
-- **Authentication:** Supabase Auth (student and admin roles)
+- **Authentication:** Supabase Auth (student and admin roles) **REQUIRED FOR STUDENT CREATION**
 - **Integration:** Future Khan Academy API integration capability
+
+#### Authentication Requirements
+- **⚠️ CRITICAL:** Student records have a foreign key constraint to `auth.users.id`
+- **Student Creation:** Requires Supabase authentication before student profile creation
+- **Database Constraint:** `students.id` must reference existing `auth.users.id`
+- **Development Approach:** Use `StudentAccountCreator` component for proper user creation
 
 #### Data Management
 - **Database:** Supabase PostgreSQL with real-time capabilities
@@ -80,10 +85,11 @@
 - Components: ActivityList, UnitProgress, ExamSchedule
 - Features: Unit-by-unit progress, activity completion, exam preparation
 
-**4. Calendar View**
+**4. Calendar View** ~~PLANNED - NOT IMPLEMENTED~~
 - Daily/weekly/monthly schedule visualization
 - Components: CalendarGrid, TaskDetails, ScheduleAdjuster
 - Features: Assignment calendar, schedule modifications, deadline tracking
+- **Status**: See TODO_LIST.md Task #14 for Daily Schedule View implementation
 
 **5. Settings & Configuration**
 - Course configuration and goal management
@@ -92,76 +98,7 @@
 
 ### 2.2 Supabase Database Schema
 
-#### Core Tables
 
-**courses**
-```sql
-CREATE TABLE courses (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name VARCHAR NOT NULL,
-  url VARCHAR NOT NULL,
-  target_completion_date DATE,
-  total_activities INTEGER DEFAULT 0,
-  activities_per_day DECIMAL,
-  start_date DATE,
-  created_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-**units**
-```sql
-CREATE TABLE units (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  course_id UUID REFERENCES courses(id),
-  unit_number INTEGER NOT NULL,
-  title VARCHAR NOT NULL,
-  total_activities INTEGER DEFAULT 0,
-  has_exam BOOLEAN DEFAULT FALSE
-);
-```
-
-**activities**
-```sql
-CREATE TABLE activities (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  course_id UUID REFERENCES courses(id),
-  unit_id UUID REFERENCES units(id),
-  activity_name VARCHAR NOT NULL,
-  activity_type activity_type_enum,
-  estimated_time INTEGER, -- minutes
-  is_exam BOOLEAN DEFAULT FALSE,
-  planned_date DATE,
-  completed BOOLEAN DEFAULT FALSE,
-  completion_date TIMESTAMP,
-  student_notes TEXT,
-  order_index INTEGER
-);
-```
-
-**progress_tracking**
-```sql
-CREATE TABLE progress_tracking (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  student_id UUID REFERENCES auth.users(id),
-  activity_id UUID REFERENCES activities(id),
-  completed BOOLEAN DEFAULT FALSE,
-  completion_date TIMESTAMP,
-  time_spent INTEGER, -- minutes
-  notes TEXT,
-  UNIQUE(student_id, activity_id)
-);
-```
-
-**settings**
-```sql
-CREATE TABLE settings (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  school_days TEXT[], -- ['sunday', 'monday', 'thursday', 'friday', 'saturday']
-  holidays JSON, -- [{"name": "Christmas", "date": "2025-12-25"}]
-  default_target_date DATE,
-  last_recalculation TIMESTAMP
-);
-```
 
 ### 2.3 React Application Structure
 
@@ -257,11 +194,12 @@ src/
 - Settings management
 - Data validation
 
-**2. CalendarGenerator.gs**
+**2. CalendarGenerator.gs** ~~NOT IMPLEMENTED - NEEDS DESIGN~~
 - Schedule calculation algorithms
 - Date handling and school day logic
 - Conflict resolution (exams, holidays)
 - Recalculation functionality
+- **Status**: See TODO_LIST.md Tasks #9-10 for algorithm design and implementation
 
 **3. ProgressTracker.gs**
 - Completion status updates
@@ -285,28 +223,30 @@ src/
 
 ## 3. IMPLEMENTATION PHASES
 
-### Phase 1: Project Setup & Course Data (Week 1) ✅ PARTIALLY COMPLETE
+### Phase 1: Project Setup & Course Data (Week 1) ✅ COMPLETED
 **Deliverables:** Development environment and complete course data
 
 #### Tasks:
-1. **Project Initialization** ⏳ READY
+1. **Project Initialization** ✅ COMPLETED
    - Create React application with Vite/Create React App
    - Set up Supabase project and database
    - Configure Netlify deployment pipeline
    - Set up GitHub repository with CI/CD
+   - **Status**: React app with Vite created, GitHub repo established, Netlify workflow ready
 
-2. **Database Setup** ⏳ READY
+2. **Database Setup** ✅ COMPLETED
    - Create Supabase database tables
    - Implement Row Level Security policies
-   - Set up authentication
+   - Set up authentication framework
    - Create database functions and triggers
+   - **Status**: All 9 tables created, RLS policies configured, connection tested successfully
 
 3. **Course Data Research** ✅ COMPLETED
    - Extract complete course structures from Khan Academy URLs
    - Identify all units, lessons, and activities
    - Categorize activity types (video, article, exercise, test)
    - Import data into Supabase database
-   - **Status**: 4 of 5 courses fully documented (1,030 activities)
+   - **Status**: 4 of 5 courses fully documented (1,030 activities), course data imported to database
 
 ### Phase 2: Core Application Development (Week 2)
 **Deliverables:** Basic functional application with authentication
@@ -380,73 +320,94 @@ src/
 
 ### 4.1 Course Data Collection Tasks
 
-#### High School Chemistry ✅ COMPLETED
-- **Status**: Fully documented in `course-data/high-school-chemistry.md`
-- **Units**: 10 units
-- **Total Activities**: 214 activities
-- **Breakdown**: 89 videos, 80 exercises, 24 articles, 11 quizzes, 10 unit tests
-- **Estimated Time**: ~40+ hours
+#### High School Chemistry  ~~NOT COMPLETED~~ - NEEDS DATA RESEARCH
+- ~~**Status**: Fully documented in `course-data/high-school-chemistry.md`~~ **Status**: Data incomplete/incorrect, requires research against Khan Academy before import
+- **Units**: 10 units *(unverified)*
+- **Total Activities**: 214 activities *(unverified)*
+- **Breakdown**: 89 videos, 80 exercises, 24 articles, 11 quizzes, 10 unit tests *(unverified)*
+- **Updated Status**: See TODO_LIST.md Task #3
 
-#### Integrated Math 3 ✅ COMPLETED
-- **Status**: Fully documented in `course-data/integrated-math-3.md`
+
+#### Integrated Math 3 ✅ PARTIALLY IMPORTED
+- **Status**: Fully documented in `course-data/math-data-formatted.md`, Unit 1 imported to database
 - **Units**: 16 units (13 with unit tests)
 - **Total Activities**: 363 activities
+- **Database Status**: Unit 1 complete (34 activities), Units 2-13 need import
 - **Breakdown**: 184 videos, 108 exercises, 25 articles, 33 quizzes, 13 unit tests
-- **Estimated Time**: ~60+ hours
+- **Updated Status**: See TODO_LIST.md Task #2
 
-#### World History ✅ COMPLETED
-- **Status**: Fully documented in `course-data/world-history.md`
-- **Units**: 6 units
-- **Total Activities**: 372 activities
-- **Breakdown**: 274 videos, 28 articles, 89 exercises, 24 quizzes, 6 unit tests
-- **Estimated Time**: ~60+ hours
 
-#### 10th Grade Reading and Vocabulary ✅ COMPLETED
-- **Status**: Fully documented in `course-data/10th-grade-reading-vocabulary.md`
-- **Units**: 6 units
-- **Total Activities**: 81 activities
-- **Breakdown**: 36 videos, 28 exercises, 9 articles, 4 quizzes, 4 unit tests
-- **Estimated Time**: ~20+ hours
+#### World History  ~~NOT COMPLETED~~ - NEEDS DATA RESEARCH
+- ~~**Status**: Fully documented in `course-data/world-history.md`~~ **Status**: Data needs verification against Khan Academy before import
+- **Units**: 6 units *(unverified)*
+- **Total Activities**: 372 activities *(unverified)*
+- **Breakdown**: 274 videos, 28 articles, 89 exercises, 24 quizzes, 6 unit tests *(unverified)*
+- **Updated Status**: See TODO_LIST.md Task #4
+
+
+#### 10th Grade Reading and Vocabulary  ~~NOT COMPLETED~~ - NEEDS DATA RESEARCH
+- ~~**Status**: Fully documented in `course-data/10th-grade-reading-vocabulary.md`~~ **Status**: Data needs verification against Khan Academy before import
+- **Units**: 6 units *(unverified)*
+- **Total Activities**: 81 activities *(unverified)*
+- **Breakdown**: 36 videos, 28 exercises, 9 articles, 4 quizzes, 4 unit tests *(unverified)*
+- ~~**Estimated Time**: ~20+ hours~~
+- **Updated Status**: See TODO_LIST.md Task #5
 
 #### Careers ⏸️ SKIPPED FOR NOW
 - **Status**: Deferred for initial implementation
 - **Reason**: Focusing on 4 core academic subjects for MVP
 
-### Course Data Summary (Current Status)
-- **Total Courses Documented**: 4 out of 5
-- **Total Activities**: 1,030 activities across all courses
-- **Total Unit Tests (EXAM DAYS)**: 33 unit tests
-- **Estimated Total Study Time**: ~180+ hours
-- **Data Collection Status**: 80% complete (skipping Careers for MVP)
+### Course Data Summary (Current Status) - ~~NOT ACCURATE~~ UPDATED OCTOBER 2, 2025
+- **Total Courses Documented**: ~~4 out of 5~~ 1 of 4 fully imported (Math Unit 1 only)
+- **Total Activities**: ~~1,030 activities across all courses~~ 34 activities imported, remainder documented but unverified
+- **Total Unit Tests (EXAM DAYS)**: ~~33 unit tests~~ *To be verified during data research*
+- ~~**Estimated Total Study Time**: ~180+ hours~~
+- **Data Collection Status**: ~~80% complete (skipping Careers for MVP)~~ See TODO_LIST.md Tasks #2-8 for current import plan
 
-### Scheduling Calculations (Based on May 30, 2026 Target)
+### Scheduling Calculations (Based on May 30, 2026 Target) - This date is an example only, should NOT BE HARDCODED
 
 #### Timeline Analysis
 - **Start Date**: September 29, 2025 (current date)
-- **Target Completion**: May 30, 2026
-- **Total Calendar Days**: 243 days
+- **Target Completion**: ASAP
+- **Total Calendar Days**: 
 - **School Days Only**: Sunday, Monday, Thursday, Friday, Saturday (5 days/week)
-- **Available School Days**: ~173 school days (excluding holidays)
+- **Available School Days**: ~173 school days (excluding holidays) - where did this calculation come from?
 
-#### Workload Distribution
-- **Total Activities to Schedule**: 1,030 activities (excluding unit tests)
-- **Activities per School Day**: ~6.0 activities/day
-- **Per Course Daily Average**:
-  - High School Chemistry: ~1.2 activities/day (214 activities)
-  - Integrated Math 3: ~2.1 activities/day (363 activities)
-  - World History: ~2.2 activities/day (372 activities)
-  - 10th Grade Reading: ~0.5 activities/day (81 activities)
+#### Per-Course Scheduling (Each Course Calculated Separately) - ALL OF THIS NEEDS CORRECTION AND VERIFICATION
+
+**High School Chemistry:** NEEDS UPDATING
+- Activities to Schedule: 204 activities (excluding 10 unit tests)
+- Exam Days: 10 dedicated exam days
+- Review Days: 10 review days before exams
+- Available Study Days: ~153 days (173 - 10 - 10)
+- **Daily Workload: ~1.3 activities/day** (204 ÷ 153)
+
+**Integrated Math 3:**
+- Activities to Schedule: 350 activities (excluding 13 unit tests)
+- Exam Days: 13 dedicated exam days  
+- Review Days: 13 review days before exams
+- Available Study Days: ~147 days (173 - 13 - 13)
+- **Daily Workload: ~2.4 activities/day** (350 ÷ 147)
+
+**World History:**
+- Activities to Schedule: 366 activities (excluding 6 unit tests)
+- Exam Days: 6 dedicated exam days
+- Review Days: 6 review days before exams  
+- Available Study Days: ~161 days (173 - 6 - 6)
+- **Daily Workload: ~2.3 activities/day** (366 ÷ 161)
+
+**10th Grade Reading & Vocabulary:**
+- Activities to Schedule: 77 activities (excluding 4 unit tests)
+- Exam Days: 4 dedicated exam days
+- Review Days: 4 review days before exams
+- Available Study Days: ~165 days (173 - 4 - 4)
+- **Daily Workload: ~0.5 activities/day** (77 ÷ 165)
 
 #### Special Day Considerations
-- **Unit Test Days**: 33 dedicated exam days (only unit test scheduled)
-- **Review Days**: 33 review days (scheduled before each unit test)
+- **Each course schedules its own exam days** (unit test as sole activity)
 - **Holiday Breaks**: Thanksgiving, Christmas, New Year (configurable)
-- **Effective Study Days**: ~107 regular study days after accounting for exams and reviews
-
-#### Adjusted Daily Workload
-- **Regular Study Days**: ~9.6 activities/day (1,030 activities ÷ 107 days)
-- **Workload Balance**: Algorithm will distribute evenly while respecting course priorities
-- **Buffer Time**: Built-in flexibility for missed days and varying complexity
+- **Course Independence**: Each course maintains separate scheduling calendar
+- **Workload Balance**: Courses scheduled independently
 
 ### 4.2 Technical Development Tasks
 
@@ -529,7 +490,7 @@ src/
 ### 5.2 Educational Metrics
 - **Progress Visibility:** Real-time tracking of all 5 courses
 - **Schedule Adherence:** Clear indication of on-time vs behind status
-- **Goal Achievement:** Automated tracking toward May 30, 2026 target
+- **Goal Achievement:** Automated tracking toward scheduled target
 - **Workload Balance:** Even distribution across school days
 
 ---
@@ -587,11 +548,11 @@ src/
 
 ## 8. PROJECT TIMELINE
 
-**Total Duration:** 4 weeks  
-**Target Launch:** October 27, 2025  
-**Full Deployment:** November 3, 2025
+**Total Duration:** 
+**Target Launch:** 
+**Full Deployment:** 
 
-### Weekly Milestones
+### Weekly Milestones - NO THIS NEEDS TO BE COMPLETE AND DEPLOYED ASAP
 - **Week 1 (Sep 29 - Oct 5):** Foundation and data collection
 - **Week 2 (Oct 6 - Oct 12):** Core functionality development
 - **Week 3 (Oct 13 - Oct 19):** Advanced features and UI
@@ -664,3 +625,125 @@ src/
 ---
 
 *This comprehensive plan serves as the roadmap for creating a modern, scalable React-based Khan Academy course tracking and scheduling system with Supabase backend and Netlify deployment, providing excellent student accessibility and administrative control through May 30, 2026.*
+
+---
+
+## 12. IMPLEMENTATION STATUS UPDATE (October 2, 2025)
+
+**IMPORTANT**: For current development progress and active task tracking, see **TODO_LIST.md**
+
+This PROJECT_PLAN.md now serves as historical context and system architecture documentation. Active development priorities, task status, and implementation details are maintained in the TODO_LIST.md document, which provides:
+
+- Current task breakdown with 20 specific implementation items
+- Priority ordering and dependency mapping  
+- Real-time status tracking across development sessions
+- Detailed acceptance criteria for each feature
+
+**Key Status Changes Since Original Plan:**
+- ✅ Individual course target dates implemented and working
+- ✅ TargetDateSettings component fully functional
+- ✅ Basic progress tracking with checkboxes operational
+- ❌ Schedule calculation system requires ground-up design and implementation
+- ❌ Daily calendar/schedule views not yet implemented
+- ❌ Course data needs research and re-import for 3 of 4 courses
+
+**Next Actions**: See TODO_LIST.md Tasks #1-2 for immediate development priorities
+
+---
+
+## 11. CURRENT STATUS UPDATE (October 2, 2025)
+
+### 11.1 Completed Development ✅
+- **Project Infrastructure**: React app with Vite, Supabase database, GitHub repo
+- **Database Schema**: 9-table PostgreSQL schema with RLS policies
+- **Core React Components**: 
+  - StudentDashboard: Course overview with daily activity calculations
+  - CourseDetail: Individual course view with lesson-grouped activities (FIXED)
+  - ProgressCharts: Data visualizations using Recharts (time tracking removed)
+  - Navigation: Multi-page routing system
+  - TargetDateSettings: UI for flexible target date management
+- **Progress Tracking System**: 
+  - Checkbox functionality for marking activities complete (WORKING)
+  - student_id made nullable for development phase
+  - Time tracking removed from progress_tracking table
+  - Course progress calculations working
+- **Integrated Math 3 Course**: 
+  - Unit 1 completely imported (34 activities across 6 lessons + 3 quizzes + 1 unit test)
+  - Lesson grouping in UI working correctly
+  - Activity completion tracking functional
+- **Local Development**: Application running successfully on localhost:5173
+
+### 11.2 Database Status 🗄️
+- **Integrated Math 3**: Unit 1 complete (34 activities), Units 2-13 need implementation
+- **High School Chemistry**: Needs data cleanup and import
+- **World History**: Needs data cleanup and import  
+- **10th Grade Reading**: Needs data cleanup and import
+- **Progress Tracking**: Functional without student authentication (development mode)
+- **Foreign Key Constraints**: Modified to support development without auth system
+
+### 11.3 UI/UX Status 🎨
+- **CourseDetail Component**: Fixed lesson grouping with visual containers
+- **Activity Checkboxes**: Working progress tracking without time collection
+- **Progress Charts**: Cleaned up to remove time tracking references
+- **Lesson Organization**: Activities properly grouped by lesson_name with clear hierarchy
+- **Error Handling**: Basic database error handling in place
+
+### 11.4 Current Issues & Debugging Needed 🔧
+- ~~**Target Date Setting**: Database update functionality not working through UI~~ **RESOLVED**: TargetDateSettings component now fully functional
+  - ~~RLS policies may be blocking UPDATE operations~~
+  - ~~Authentication/permissions issue preventing target date modifications~~
+  - ~~**Priority**: High - needed for flexible scheduling~~ **Status**: Working as of October 2, 2025
+- **Netlify Deployment**: No current connection to Netlify hosting
+  - Application running locally only
+  - Deployment pipeline needs to be configured
+  - **Priority**: Medium - needed for production access
+
+### 11.5 Next Priority Features (Immediate Needs) 🎯 ~~SUPERSEDED BY TODO_LIST.md~~
+~~1. **Complete Integrated Math 3 Import**: 
+   - Implement Units 2-13 from math-data-formatted.md (363 additional activities)
+   - Use clean import pattern established with Unit 1
+   - Maintain lesson grouping structure
+
+2. **Complete Task Scheduler Implementation**: 
+   - Task scheduler is implemented but not complete
+   - Calculate exact due date for each activity
+   - Handle fractional daily targets (e.g., 1.3 tasks/day distribution)
+   - Respect exam days in scheduling
+   - Show activities with assigned dates in CourseDetail view
+
+3. **Complete Task Completion System**:
+   - Task completion system only has one task complete
+   - Checkbox interface for marking activities complete (PARTIAL - basic functionality working)
+   - Track completion dates and progress vs schedule
+   - Show "days ahead/behind" status for working ahead or falling behind
+   - **NO auto-recalculation** - all recalculation should be manually triggered by user
+
+4. **Schedule Calculation Engine**:
+   - Smart distribution of all activities for each course across school days
+   - Algorithm for remainder handling when daily target isn't whole number
+   - Integration with configurable target completion date (user-adjustable, not hardcoded)~~
+
+**CURRENT PRIORITY STATUS**: See TODO_LIST.md for complete task breakdown and current priorities
+
+### 11.6 Technical Debt & Future Improvements 📝
+- **Authentication System**: Currently bypassed for development, needs implementation
+- **Other Course Data**: Chemistry, World History, Reading need data cleanup before import
+- **Mobile Optimization**: Desktop-first design, mobile needs optimization
+- **Performance**: Working but not optimized for large datasets
+- **Real-time Updates**: Basic functionality present, could be enhanced
+
+### 11.7 Immediate Next Session Tasks ~~SUPERSEDED BY TODO_LIST.md~~
+~~1. **Complete Math Import**: Add Units 2-13 activities from formatted data (363 activities)
+2. **Build Date Assignment System**: Calculate and display due dates for all activities
+3. **Implement Daily Distribution**: Smart algorithm for fractional daily targets
+4. **Fix Target Date Updates**: Resolve database update permissions for flexible target dates
+2. **Build Detailed Activity Scheduler**: Show all 1,030 activities with due dates
+3. **Implement Smart Daily Distribution**: Handle fractional daily targets properly
+4. **Add Task Completion Tracking**: Checkbox system with progress calculation
+5. **Create Work-Ahead Indicators**: Show how many days ahead/behind schedule~~
+
+**CURRENT SESSION PLANNING**: See TODO_LIST.md for comprehensive task breakdown and prioritization
+
+~~**Session Outcome**: Foundation is solid, core infrastructure complete. Need to move from summary views to detailed task management with precise scheduling and completion tracking.~~
+
+**Updated Session Outcome (October 2, 2025)**: TargetDateSettings functionality restored, individual course target dates working. Ready to proceed with test student creation and schedule calculation system implementation.
