@@ -1,10 +1,6 @@
 [build]
-  base = "frontend"
-  command = "rm -rf node_modules && npm install && npm run build"
-  publish = "dist"
-
-[build.processing]
-  skip_processing = false
+  command = "cd frontend && rm -rf node_modules package-lock.json && npm install && npm run build"
+  publish = "frontend/dist"
 
 [build.environment]
   VITE_SUPABASE_URL = "https://omkfiypuyeqcytthursn.supabase.co"
