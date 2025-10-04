@@ -1,0 +1,11 @@
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  VITE_SUPABASE_URL = "https://omkfiypuyeqcytthursn.supabase.co"
+  VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ta2ZpeXB1eWVxY3l0dGh1cnNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODQ0MzgsImV4cCI6MjA3NDc2MDQzOH0.Wv3Q5Fl7HGR-xnzYS1v0azT0ZtuMZOW7TCxNitBjwYw"
+  VITE_APP_NAME = "Khan Academy Tracker"
+  VITE_APP_VERSION = "1.0.0"
+  VITE_ENVIRONMENT = "production"
