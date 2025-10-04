@@ -1,6 +1,10 @@
 [build]
   command = "cd frontend && npm install && npm run build"
   publish = "frontend/dist"
+  ignore = "/bin/false"
+
+[functions]
+  directory = "netlify/functions"
 
 [build.environment]
   VITE_SUPABASE_URL = "https://omkfiypuyeqcytthursn.supabase.co"
