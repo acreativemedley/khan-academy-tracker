@@ -31,6 +31,7 @@
 - Always ensure that any changes made are compatible with the project's target audience and users.
 - Always ensure that any changes made are compatible with the project's goals and objectives.
 - Always ensure that any changes made are compatible with the project's timeline and deadlines.
+- 
 - Always ensure that any changes made are compatible with the project's budget and resources.
 
 
@@ -43,6 +44,7 @@
   - Use separate commands when chaining fails
   - Example: `cd frontend; npm install` NOT `cd frontend && npm install`
   - If unsure, use separate terminal commands rather than chaining
+  - Always commit to the main branch on GitHub.
 
 ## NPM Commands
 - **IMPORTANT**: Always ensure you are in the `frontend` directory before running any npm commands
