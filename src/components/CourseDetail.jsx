@@ -31,6 +31,7 @@ import {
   School as ExamIcon
 } from '@mui/icons-material';
 import { supabase } from '../services/supabase';
+import { getTodayString, createLocalDate } from '../utils/dateUtils';
 
 const CourseDetail = () => {
   const { courseId } = useParams();
@@ -38,6 +39,7 @@ const CourseDetail = () => {
   const [units, setUnits] = useState([]);
   const [activities, setActivities] = useState([]);
   const [progress, setProgress] = useState({});
+  const [schedule, setSchedule] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
@@ -141,6 +143,22 @@ const CourseDetail = () => {
       });
       setProgress(progressMap);
 
+      // Fetch schedule for this course and this student
+      const { data: scheduleData, error: scheduleError } = await supabase
+        .from('schedule')
+        .select('*')
+        .eq('course_id', courseId)
+        .eq('student_id', user.id);
+
+      if (scheduleError) throw scheduleError;
+
+      // Convert schedule array to object keyed by activity_id
+      const scheduleMap = {};
+      scheduleData.forEach(s => {
+        scheduleMap[s.activity_id] = s;
+      });
+      setSchedule(scheduleMap);
+
     } catch (err) {
       console.error('Course detail error:', err);
       setError(err.message);
@@ -207,6 +225,17 @@ const CourseDetail = () => {
       case 'test': return <ExamIcon color="error" />;
       default: return <ExerciseIcon />;
     }
+  };
+
+  const isActivityOverdue = (activity) => {
+    const scheduleEntry = schedule[activity.id];
+    if (!scheduleEntry) return false;
+    
+    const isCompleted = progress[activity.id]?.completed || false;
+    if (isCompleted) return false; // Completed activities are not overdue
+    
+    const today = getTodayString();
+    return scheduleEntry.scheduled_date < today;
   };
 
   const getUnitProgress = (unitId) => {
@@ -318,7 +347,7 @@ const CourseDetail = () => {
             <Grid item xs={6} sm={3}>
               <Typography variant="h5" color="warning.main">
                 {course.target_completion_date ? 
-                  new Date(course.target_completion_date).toLocaleDateString() : 'Not set'
+                  createLocalDate(course.target_completion_date).toLocaleDateString() : 'Not set'
                 }
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -385,15 +414,25 @@ const CourseDetail = () => {
                     <List sx={{ pl: 2, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: '#fafafa' }}>
                       {lessonActivities.map((activity) => {
                         const isCompleted = progress[activity.id]?.completed || false;
+                        const scheduleEntry = schedule[activity.id];
+                        const isOverdue = isActivityOverdue(activity);
                         
                         return (
-                          <ListItem key={activity.id} sx={{ pl: 0 }}>
+                          <ListItem 
+                            key={activity.id} 
+                            sx={{ 
+                              pl: 0,
+                              bgcolor: isOverdue ? '#ffebee' : 'transparent',
+                              borderLeft: isOverdue ? '4px solid #d32f2f' : 'none',
+                              mb: 0.5
+                            }}
+                          >
                             <ListItemIcon>
                               {getActivityIcon(activity.activity_type)}
                             </ListItemIcon>
                             <ListItemText
                               primary={
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                                   <FormControlLabel
                                     control={
                                       <Checkbox
@@ -402,8 +441,16 @@ const CourseDetail = () => {
                                       />
                                     }
                                     label={activity.activity_name}
-                                    sx={{ flexGrow: 1 }}
+                                    sx={{ flexGrow: 1, minWidth: '200px' }}
                                   />
+                                  {scheduleEntry && (
+                                    <Chip 
+                                      label={`Due: ${createLocalDate(scheduleEntry.scheduled_date).toLocaleDateString()}`}
+                                      size="small" 
+                                      color={isOverdue ? 'error' : 'default'}
+                                      variant={isOverdue ? 'filled' : 'outlined'}
+                                    />
+                                  )}
                                   <Chip 
                                     label={activity.activity_type} 
                                     size="small" 
@@ -416,19 +463,16 @@ const CourseDetail = () => {
                                       size="small"
                                     />
                                   )}
-                                  {activity.estimated_time && (
-                                    <Chip 
-                                      label={`${activity.estimated_time}min`} 
-                                      size="small" 
-                                      variant="outlined"
-                                    />
-                                  )}
                                 </Box>
                               }
                               secondary={
                                 isCompleted && progress[activity.id]?.completion_date ? (
                                   <Typography variant="caption" color="success.main">
-                                    Completed: {new Date(progress[activity.id].completion_date).toLocaleDateString()}
+                                    Completed: {createLocalDate(progress[activity.id].completion_date).toLocaleDateString()}
+                                  </Typography>
+                                ) : isOverdue ? (
+                                  <Typography variant="caption" color="error">
+                                    Overdue
                                   </Typography>
                                 ) : null
                               }

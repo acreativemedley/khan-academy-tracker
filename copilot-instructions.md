@@ -42,16 +42,17 @@
   - **CRITICAL**: NEVER use `&&` for command chaining - it causes errors in PowerShell
   - Use semicolon (`;`) for command chaining instead
   - Use separate commands when chaining fails
-  - Example: `cd frontend; npm install` NOT `cd frontend && npm install`
+  - Example: `cd tracker; npm install` NOT `cd tracker && npm install`
   - If unsure, use separate terminal commands rather than chaining
   - Always commit to the main branch on GitHub.
 
 ## NPM Commands
-- **IMPORTANT**: Always ensure you are in the `frontend` directory before running any npm commands
-- **Start Development Server**: Use `cd frontend; npm run dev` to launch localhost
+- **IMPORTANT**: The React application now runs from the root `tracker` directory
+- **Start Development Server**: Use `npm run dev` from the `tracker` directory to launch localhost
 - Check current directory with `pwd` before running npm commands
-- Use `cd frontend` if not already in the frontend directory
-- React application is located in `/frontend` subdirectory
+- The main application files are in `tracker/src` subdirectory
+- **DO NOT** use the `/frontend` subfolder - it is legacy and not actively used
+- All React components, services, and utilities are in `tracker/src/`
 
 ## Project Context
 - This is a Khan Academy course tracking application

@@ -15,7 +15,7 @@ import {
   CardActions
 } from '@mui/material';
 import { supabase } from '../services/supabase';
-import { createLocalDate, daysBetween, getDaysRemaining, formatDateForDisplay } from '../utils/dateUtils';
+import { createLocalDate, daysBetween, getDaysRemaining, formatDateForDisplay, formatDateForDB } from '../utils/dateUtils';
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
@@ -117,7 +117,9 @@ const StudentDashboard = () => {
             : 0;
 
           // Get today's scheduled activities for this course
-          const today = new Date().toISOString().split('T')[0];
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const todayString = formatDateForDB(today);
           const { data: todayActivitiesData, error: scheduleError } = await supabase
             .from('schedule')
             .select(`
@@ -128,12 +130,11 @@ const StudentDashboard = () => {
               activities!inner(
                 id,
                 activity_name,
-                activity_type,
-                estimated_time
+                activity_type
               )
             `)
             .eq('course_id', course.id)
-            .eq('scheduled_date', today);
+            .eq('scheduled_date', todayString);
 
           if (scheduleError) {
             console.error('Schedule error:', scheduleError);

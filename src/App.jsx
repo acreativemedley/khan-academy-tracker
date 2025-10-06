@@ -6,6 +6,7 @@ import StudentDashboard from './components/StudentDashboard'
 import CourseDetail from './components/CourseDetail'
 import ProgressCharts from './components/ProgressCharts'
 import TargetDateSettings from './components/TargetDateSettings'
+import DailyScheduleView from './components/DailyScheduleView'
 import Navigation from './components/Navigation'
 import StudentAccountCreator from './components/StudentAccountCreator'
 import TestStudentProfile from './components/TestStudentProfile'
@@ -34,9 +35,11 @@ function App() {
           <Container maxWidth="lg">
             <Routes>
               <Route path="/" element={<StudentDashboard />} />
+              <Route path="/schedule" element={<DailyScheduleView />} />
               <Route path="/courses/:courseId" element={<CourseDetail />} />
               <Route path="/progress" element={<ProgressCharts />} />
               <Route path="/settings" element={<TargetDateSettings />} />
+              <Route path="/target-dates" element={<TargetDateSettings />} />
               <Route path="/test-student" element={<StudentAccountCreator />} />
               <Route path="/test-profile" element={<TestStudentProfile />} />
             </Routes>

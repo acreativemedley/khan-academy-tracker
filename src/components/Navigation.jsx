@@ -12,7 +12,8 @@ import {
   Dashboard as DashboardIcon,
   TrendingUp as ProgressIcon,
   Settings as SettingsIcon,
-  Storage as DatabaseIcon
+  Storage as DatabaseIcon,
+  Today as TodayIcon
 } from '@mui/icons-material';
 
 const Navigation = () => {
@@ -25,6 +26,12 @@ const Navigation = () => {
       path: '/',
       icon: <DashboardIcon />,
       description: 'Course overview and today\'s tasks'
+    },
+    {
+      label: 'Schedule',
+      path: '/schedule',
+      icon: <TodayIcon />,
+      description: 'Daily, weekly, and monthly schedule view'
     },
     {
       label: 'Progress',
