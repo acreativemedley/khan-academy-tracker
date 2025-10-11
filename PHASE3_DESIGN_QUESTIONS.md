@@ -137,13 +137,13 @@ Please provide specific date ranges: All dates are formatted US style mm/dd/yy
 **Thanksgiving Break:**
 - Start Date: ________________
 - End Date: ________________
-Thanksgiving is the 4th Thursday in November, Break should start the Tuesday before (last lessons on Monday), and end on Sunday (resume lessons on Monday)
+
 **Christmas Break:**
-- Start Date: _____12/23/25___________
-- End Date: __________1/2/26______
+- Start Date: ____________
+- End Date: ____________
 
 **New Year (if separate from Christmas):**
-- Start Date: _____Combined with Christmas___________
+- Start Date: _____________
 - End Date: ________________
 
 **Spring Break (if applicable):**
@@ -161,8 +161,7 @@ Thanksgiving is the 4th Thursday in November, Break should start the Tuesday bef
 
 **Your Answer:**
 
-
-configurable per school year
+I will configure all vacations manually
 
 ---
 

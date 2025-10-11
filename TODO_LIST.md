@@ -11,9 +11,10 @@
 This TODO list represents the remaining work to complete the Khan Academy Multi-Course Academic Planner based on the PROJECT_PLAN requirements and current implementation status. Tasks are organized by priority and dependencies.
 
 **Total Tasks:** 20  
-**Completed:** 1  
-**In Progress:** 0  
-**Not Started:** 19  
+**Completed:** 12  
+**In Progress:** 1  
+**Not Started:** 6
+**Broken/Needs Rebuild:** 1  
 
 ---
 
@@ -22,6 +23,7 @@ This TODO list represents the remaining work to complete the Khan Academy Multi-
 - 🔄 **IN PROGRESS** - Currently being worked on
 - ⏸️ **BLOCKED** - Waiting on dependency or external input
 - ❌ **NOT STARTED** - Not yet begun
+- ⚠️ **BROKEN** - Previously working but needs rebuild
 
 ---
 
@@ -159,7 +161,7 @@ This TODO list represents the remaining work to complete the Khan Academy Multi-
 
 ## PHASE 3: Scheduling System Design & Implementation
 
-### Task 9: Design Schedule Calculation Algorithm ❌
+### Task 9: Design Schedule Calculation Algorithm ✅
 **Priority:** HIGH - Critical  
 **Dependencies:** Task 2 (Full Math Data)  
 **Description:** Design and specify the scheduling algorithm that will: 1) Calculate due dates for all activities based on target completion dates, 2) Handle fractional daily targets (e.g. 1.3 activities/day), 3) Respect exam days as sole activities, 4) Account for school days only (Sun, Mon, Thu, Fri, Sat), 5) Handle vacation days and holidays, 6) Support bulk assignment with manual override capability.
@@ -171,13 +173,14 @@ This TODO list represents the remaining work to complete the Khan Academy Multi-
 - Vacation day handling approach specified
 - Manual override system requirements defined
 
-**Status:** ❌ NOT STARTED  
+**Status:** ✅ COMPLETED  
+**Completed Date:** October 10, 2025  
 **Estimated Time:** 2-3 hours (discussion + documentation)  
-**Notes:** Requires user input and collaboration
+**Notes:** Algorithm designed and specified
 
 ---
 
-### Task 10: Implement Schedule Calculation Engine ❌
+### Task 10: Implement Schedule Calculation Engine ✅
 **Priority:** HIGH - Critical  
 **Dependencies:** Task 9 (Algorithm Design)  
 **Description:** Build the core scheduling engine based on algorithm design (#9). This should calculate and assign due dates to all activities across all courses, handling school days, exam days, vacation days, and fractional daily distributions.
@@ -189,13 +192,14 @@ This TODO list represents the remaining work to complete the Khan Academy Multi-
 - Exam day isolation working
 - Vacation day exclusion working
 
-**Status:** ❌ NOT STARTED  
+**Status:** ✅ COMPLETED  
+**Completed Date:** October 10, 2025  
 **Estimated Time:** 4-6 hours  
-**Notes:** 
+**Notes:** Core scheduling engine implemented in scheduleService.js and scheduleUtils.js 
 
 ---
 
-### Task 11: Create Vacation Days Management System ❌
+### Task 11: Create Vacation Days Management System ⚠️
 **Priority:** HIGH - Top 3 User Priority  
 **Dependencies:** Task 10 (Schedule Engine)  
 **Description:** Build UI and backend functionality to allow setting vacation days that will be excluded from schedule calculations. This should integrate with the schedule calculation engine (#10) and allow date range specification.
@@ -206,13 +210,13 @@ This TODO list represents the remaining work to complete the Khan Academy Multi-
 - Schedule recalculation when vacation days change
 - Visual indication of vacation days
 
-**Status:** ❌ NOT STARTED  
+**Status:** ⚠️ BROKEN - Needs Rebuild  
 **Estimated Time:** 2-3 hours  
-**Notes:** 
+**Notes:** Previous implementation worked perfectly but was removed by overzealous AI. Database table (vacation_periods) exists. Needs fresh UI implementation. 
 
 ---
 
-### Task 12: Add Due Dates to CourseDetail View ❌
+### Task 12: Add Due Dates to CourseDetail View ✅
 **Priority:** HIGH - Critical  
 **Dependencies:** Task 10 (Schedule Engine)  
 **Description:** Update CourseDetail component to display calculated due dates for each activity. Currently shows task list without dates. Should show assigned dates from schedule calculation engine.
@@ -223,9 +227,10 @@ This TODO list represents the remaining work to complete the Khan Academy Multi-
 - Clear date formatting
 - Integration with schedule calculations
 
-**Status:** ❌ NOT STARTED  
+**Status:** ✅ COMPLETED  
+**Completed Date:** October 10, 2025  
 **Estimated Time:** 1-2 hours  
-**Notes:** 
+**Notes:** CourseDetail.jsx displays due dates for activities 
 
 ---
 
@@ -248,7 +253,7 @@ This TODO list represents the remaining work to complete the Khan Academy Multi-
 
 ---
 
-### Task 14: Build Daily Schedule View ❌
+### Task 14: Build Daily Schedule View 🔄
 **Priority:** HIGH - Missing Core Feature  
 **Dependencies:** Task 10 (Schedule Engine), Task 13 (Student Progress)  
 **Description:** Create a daily schedule/calendar view that shows today's assigned activities across all courses. This is a key missing component mentioned in user requirements.
@@ -259,9 +264,9 @@ This TODO list represents the remaining work to complete the Khan Academy Multi-
 - Completion checkboxes functional
 - Navigation to previous/next days
 
-**Status:** ❌ NOT STARTED  
+**Status:** 🔄 IN PROGRESS  
 **Estimated Time:** 3-4 hours  
-**Notes:** 
+**Notes:** DailyScheduleView.jsx component built but needs additional work/refinement 
 
 ---
 
@@ -391,7 +396,8 @@ Task 1 → Task 2 → Task 9 → Task 10 → Tasks 11-17
 | Date | Changes | Notes |
 |------|---------|-------|
 | Oct 2, 2025 | Initial TODO list created | Based on implementation status review |
+| Oct 10, 2025 | Updated tasks 9, 10, 12, 14 to completed/in-progress | Tasks 11 marked as broken/needs rebuild |
 
 ---
 
-**Last Updated:** October 2, 2025
+**Last Updated:** October 10, 2025

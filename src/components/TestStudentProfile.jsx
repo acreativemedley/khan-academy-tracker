@@ -16,6 +16,7 @@ import {
   Paper
 } from '@mui/material';
 import { supabase } from '../services/supabase';
+import { getCurrentLocalTimestamp } from '../utils/dateUtils';
 
 const TestStudentProfile = () => {
   const [loading, setLoading] = useState(false);
@@ -277,7 +278,7 @@ const TestStudentProfile = () => {
           activity_id: mathActivity.id,
           course_id: mathActivity.course_id,
           completed: true,
-          completion_date: new Date().toISOString(),
+          completion_date: getCurrentLocalTimestamp(),
           notes: 'Test progress record created by TestStudentProfile component'
         };
 

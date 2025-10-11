@@ -15,7 +15,7 @@ import {
   CardActions
 } from '@mui/material';
 import { supabase } from '../services/supabase';
-import { createLocalDate, daysBetween, getDaysRemaining, formatDateForDisplay, formatDateForDB } from '../utils/dateUtils';
+import { createLocalDate, daysBetween, getDaysRemaining, formatDateForDB } from '../utils/dateUtils';
 
 const StudentDashboard = () => {
   const navigate = useNavigate();

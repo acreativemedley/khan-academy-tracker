@@ -29,6 +29,22 @@ export function formatDateForDB(date) {
 }
 
 /**
+ * Format a date string or Date object for display (M/D/YYYY)
+ */
+export function formatDateForDisplay(date) {
+  if (!date) return '';
+  
+  const dateObj = typeof date === 'string' ? createLocalDate(date) : date;
+  if (!dateObj) return '';
+  
+  const month = dateObj.getMonth() + 1;
+  const day = dateObj.getDate();
+  const year = dateObj.getFullYear();
+  
+  return `${month}/${day}/${year}`;
+}
+
+/**
  * Get today's date as YYYY-MM-DD string in local timezone
  */
 export function getTodayString() {
@@ -49,13 +65,22 @@ export function daysBetween(startDate, endDate) {
 }
 
 /**
- * Format a date for display (locale-aware)
+ * Get current timestamp as ISO string in local timezone
+ * This ensures timestamps represent the actual local time when stored
  */
-export function formatDateForDisplay(dateString) {
-  if (!dateString) return 'No date set';
+export function getCurrentLocalTimestamp() {
+  const now = new Date();
+  // Create timestamp string that represents current local time
+  // Format: YYYY-MM-DDTHH:mm:ss.sss (no Z suffix for local time)
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
   
-  const date = createLocalDate(dateString);
-  return date.toLocaleDateString();
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 
 /**

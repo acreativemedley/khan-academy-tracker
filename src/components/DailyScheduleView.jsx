@@ -32,7 +32,7 @@ import {
   NavigateNext as NextIcon
 } from '@mui/icons-material';
 import { supabase } from '../services/supabase';
-import { getTodayString, createLocalDate, formatDateForDB } from '../utils/dateUtils';
+import { getTodayString, createLocalDate, formatDateForDB, getCurrentLocalTimestamp } from '../utils/dateUtils';
 
 const DailyScheduleView = () => {
   const [view, setView] = useState('today'); // 'today', 'week', 'month'
@@ -180,7 +180,7 @@ const DailyScheduleView = () => {
             course_id: activity.course_id,
             activity_id: activity.activity_id,
             completed: true,
-            completion_date: new Date().toISOString()
+            completion_date: getCurrentLocalTimestamp()
           });
 
         if (error) throw error;
@@ -429,7 +429,7 @@ const DailyScheduleView = () => {
                           secondary={
                             isCompleted && progress[item.activity_id]?.completion_date ? (
                               <Typography variant="caption" color="success.main">
-                                ✓ Completed: {createLocalDate(progress[item.activity_id].completion_date).toLocaleDateString()}
+                                ✓ Completed: {new Date(progress[item.activity_id].completion_date).toLocaleDateString()}
                               </Typography>
                             ) : null
                           }
