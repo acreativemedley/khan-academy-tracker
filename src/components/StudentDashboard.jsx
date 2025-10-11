@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Grid,
@@ -19,6 +19,7 @@ import { createLocalDate, daysBetween, getDaysRemaining, formatDateForDB } from 
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -59,7 +60,7 @@ const StudentDashboard = () => {
     if (user) {
       fetchDashboardData();
     }
-  }, [user]);
+  }, [user, location.pathname]);
 
   const getCurrentUser = async () => {
     try {
@@ -140,11 +141,33 @@ const StudentDashboard = () => {
             console.error('Schedule error:', scheduleError);
           }
 
+          // Filter out completed activities by checking progress_tracking
+          let incompleteTodayActivities = todayActivitiesData || [];
+          if (todayActivitiesData && todayActivitiesData.length > 0) {
+            const activityIds = todayActivitiesData.map(item => item.activities.id);
+            const { data: completedActivities, error: completedError } = await supabase
+              .from('progress_tracking')
+              .select('activity_id')
+              .eq('student_id', user.id)
+              .eq('course_id', course.id)
+              .eq('completed', true)
+              .in('activity_id', activityIds);
+
+            if (completedError) {
+              console.error('Completed activities error:', completedError);
+            }
+
+            const completedIds = new Set(completedActivities?.map(p => p.activity_id) || []);
+            incompleteTodayActivities = todayActivitiesData.filter(
+              item => !completedIds.has(item.activities.id)
+            );
+          }
+
           return {
             ...course,
             completedActivities: completedCount || 0,
             progressPercentage,
-            todayActivities: todayActivitiesData || [],
+            todayActivities: incompleteTodayActivities,
             activitiesPerDay: calculateActivitiesPerDay(course)
           };
         })

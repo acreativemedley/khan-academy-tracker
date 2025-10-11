@@ -13,7 +13,8 @@ import {
   TrendingUp as ProgressIcon,
   Settings as SettingsIcon,
   Storage as DatabaseIcon,
-  Today as TodayIcon
+  Today as TodayIcon,
+  BeachAccess as VacationIcon
 } from '@mui/icons-material';
 
 const Navigation = () => {
@@ -32,6 +33,12 @@ const Navigation = () => {
       path: '/schedule',
       icon: <TodayIcon />,
       description: 'Daily, weekly, and monthly schedule view'
+    },
+    {
+      label: 'Vacations',
+      path: '/vacations',
+      icon: <VacationIcon />,
+      description: 'Manage vacation periods and regenerate schedules'
     },
     {
       label: 'Progress',
