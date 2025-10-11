@@ -29,6 +29,22 @@ export function formatDateForDB(date) {
 }
 
 /**
+ * Format a date string or Date object for display (M/D/YYYY)
+ */
+export function formatDateForDisplay(date) {
+  if (!date) return '';
+  
+  const dateObj = typeof date === 'string' ? createLocalDate(date) : date;
+  if (!dateObj) return '';
+  
+  const month = dateObj.getMonth() + 1;
+  const day = dateObj.getDate();
+  const year = dateObj.getFullYear();
+  
+  return `${month}/${day}/${year}`;
+}
+
+/**
  * Get today's date as YYYY-MM-DD string in local timezone
  */
 export function getTodayString() {
