@@ -31,7 +31,7 @@ import {
   School as ExamIcon
 } from '@mui/icons-material';
 import { supabase } from '../services/supabase';
-import { getTodayString, createLocalDate } from '../utils/dateUtils';
+import { getTodayString, createLocalDate, getCurrentLocalTimestamp } from '../utils/dateUtils';
 
 const CourseDetail = () => {
   const { courseId } = useParams();
@@ -183,7 +183,7 @@ const CourseDetail = () => {
             course_id: courseId,
             activity_id: activity.id,
             completed: true,
-            completion_date: new Date().toISOString()
+            completion_date: getCurrentLocalTimestamp()
           });
 
         if (error) throw error;
@@ -468,7 +468,7 @@ const CourseDetail = () => {
                               secondary={
                                 isCompleted && progress[activity.id]?.completion_date ? (
                                   <Typography variant="caption" color="success.main">
-                                    Completed: {createLocalDate(progress[activity.id].completion_date).toLocaleDateString()}
+                                    Completed: {new Date(progress[activity.id].completion_date).toLocaleDateString()}
                                   </Typography>
                                 ) : isOverdue ? (
                                   <Typography variant="caption" color="error">

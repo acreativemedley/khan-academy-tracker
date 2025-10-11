@@ -49,13 +49,22 @@ export function daysBetween(startDate, endDate) {
 }
 
 /**
- * Format a date for display (locale-aware)
+ * Get current timestamp as ISO string in local timezone
+ * This ensures timestamps represent the actual local time when stored
  */
-export function formatDateForDisplay(dateString) {
-  if (!dateString) return 'No date set';
+export function getCurrentLocalTimestamp() {
+  const now = new Date();
+  // Create timestamp string that represents current local time
+  // Format: YYYY-MM-DDTHH:mm:ss.sss (no Z suffix for local time)
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
   
-  const date = createLocalDate(dateString);
-  return date.toLocaleDateString();
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 
 /**
