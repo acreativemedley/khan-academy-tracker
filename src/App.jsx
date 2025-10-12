@@ -7,6 +7,7 @@ import CourseDetail from './components/CourseDetail'
 import ProgressCharts from './components/ProgressCharts'
 import TargetDateSettings from './components/TargetDateSettings'
 import DailyScheduleView from './components/DailyScheduleView'
+import VacationManager from './components/VacationManager'
 import Navigation from './components/Navigation'
 import StudentAccountCreator from './components/StudentAccountCreator'
 import TestStudentProfile from './components/TestStudentProfile'
@@ -36,6 +37,7 @@ function App() {
             <Routes>
               <Route path="/" element={<StudentDashboard />} />
               <Route path="/schedule" element={<DailyScheduleView />} />
+              <Route path="/vacations" element={<VacationManager />} />
               <Route path="/courses/:courseId" element={<CourseDetail />} />
               <Route path="/progress" element={<ProgressCharts />} />
               <Route path="/settings" element={<TargetDateSettings />} />
