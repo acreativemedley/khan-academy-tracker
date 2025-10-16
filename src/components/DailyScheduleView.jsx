@@ -121,21 +121,34 @@ const DailyScheduleView = () => {
     date.setHours(0, 0, 0, 0);
 
     if (view === 'today') {
+      // Include overdue activities from the past, plus today
+      // Start from a year ago to catch any old overdue items
+      const startDate = new Date(date);
+      startDate.setFullYear(startDate.getFullYear() - 1);
+      
       return {
-        startDate: formatDateForDB(date),
+        startDate: formatDateForDB(startDate),
         endDate: formatDateForDB(date)
       };
     } else if (view === 'week') {
-      // Get start of week (Sunday)
+      // Get start of week (Thursday)
       const startOfWeek = new Date(date);
-      startOfWeek.setDate(date.getDate() - date.getDay());
+      const dayOfWeek = date.getDay();
+      // Thursday is day 4, so we need to go back to the most recent Thursday
+      // If today is Thu(4), go back 0. If Fri(5), go back 1. If Sat(6), go back 2. If Sun(0), go back 3. If Mon(1), go back 4. If Tue(2), go back 5. If Wed(3), go back 6.
+      const daysToThursday = (dayOfWeek + 3) % 7;
+      startOfWeek.setDate(date.getDate() - daysToThursday);
       
-      // Get end of week (Saturday)
+      // Get end of week (Monday)
       const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setDate(startOfWeek.getDate() + 4); // Thursday + 4 days = Monday
+
+      // Include overdue activities: start from a year ago, end with current week
+      const overdueCutoff = new Date(endOfWeek);
+      overdueCutoff.setFullYear(overdueCutoff.getFullYear() - 1);
 
       return {
-        startDate: formatDateForDB(startOfWeek),
+        startDate: formatDateForDB(overdueCutoff),
         endDate: formatDateForDB(endOfWeek)
       };
     } else { // month
@@ -237,10 +250,13 @@ const DailyScheduleView = () => {
         return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
       }
     } else if (view === 'week') {
+      const dayOfWeek = date.getDay();
       const startOfWeek = new Date(date);
-      startOfWeek.setDate(date.getDate() - date.getDay());
+      const daysToThursday = (dayOfWeek + 3) % 7;
+      startOfWeek.setDate(date.getDate() - daysToThursday);
+      
       const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setDate(startOfWeek.getDate() + 4); // Thursday + 4 days = Monday
       
       return `${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
     } else {
@@ -248,31 +264,45 @@ const DailyScheduleView = () => {
     }
   };
 
-  // Group schedule data by date or course
+  // Group schedule data by course, with overdue items first
+  // Filter out completed activities
   const groupedData = () => {
-    if (view === 'today') {
-      // Group by course
-      const grouped = {};
+    const grouped = {};
+    
+    if (view === 'today' || view === 'week' || view === 'month') {
+      // All views: group by course, excluding completed activities
       scheduleData.forEach(item => {
+        // Skip completed activities
+        const isCompleted = progress[item.activity_id]?.completed || false;
+        if (isCompleted) {
+          return; // Skip this item
+        }
+        
         const courseName = item.course.name;
         if (!grouped[courseName]) {
           grouped[courseName] = [];
         }
         grouped[courseName].push(item);
       });
-      return grouped;
-    } else {
-      // Group by date
-      const grouped = {};
-      scheduleData.forEach(item => {
-        const date = item.scheduled_date;
-        if (!grouped[date]) {
-          grouped[date] = [];
-        }
-        grouped[date].push(item);
+      
+      // Sort items within each course group: overdue first, then by date
+      Object.keys(grouped).forEach(courseName => {
+        grouped[courseName].sort((a, b) => {
+          const aOverdue = !progress[a.activity_id]?.completed && isOverdue(a.scheduled_date);
+          const bOverdue = !progress[b.activity_id]?.completed && isOverdue(b.scheduled_date);
+          
+          // Overdue items first
+          if (aOverdue !== bOverdue) {
+            return aOverdue ? -1 : 1;
+          }
+          
+          // Then sort by date
+          return a.scheduled_date.localeCompare(b.scheduled_date);
+        });
       });
-      return grouped;
     }
+    
+    return grouped;
   };
 
   const isOverdue = (scheduledDate) => {
@@ -301,6 +331,10 @@ const DailyScheduleView = () => {
   const grouped = groupedData();
   const totalActivities = scheduleData.length;
   const completedActivities = scheduleData.filter(s => progress[s.activity_id]?.completed).length;
+  const incompleteActivities = totalActivities - completedActivities;
+  
+  // Count how many incomplete activities are displayed
+  const displayedActivitiesCount = Object.values(grouped).reduce((sum, items) => sum + items.length, 0);
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -348,19 +382,24 @@ const DailyScheduleView = () => {
 
         {/* Summary */}
         {totalActivities > 0 && (
-          <Alert severity="info" sx={{ mb: 2 }}>
-            {completedActivities} of {totalActivities} activities completed
-            {completedActivities === totalActivities && " 🎉"}
+          <Alert severity={incompleteActivities === 0 ? "success" : "info"} sx={{ mb: 2 }}>
+            {incompleteActivities === 0 
+              ? `All ${totalActivities} activities completed! 🎉` 
+              : `${incompleteActivities} ${incompleteActivities === 1 ? 'activity' : 'activities'} remaining (${completedActivities} completed)`
+            }
           </Alert>
         )}
       </Box>
 
       {/* Schedule Content */}
-      {totalActivities === 0 ? (
+      {displayedActivitiesCount === 0 ? (
         <Card>
           <CardContent>
             <Typography variant="body1" color="text.secondary" align="center">
-              No activities scheduled for this {view === 'today' ? 'day' : view === 'week' ? 'week' : 'month'}.
+              {totalActivities === 0 
+                ? `No activities scheduled for this ${view === 'today' ? 'day' : view === 'week' ? 'week' : 'month'}.`
+                : `All activities completed for this ${view === 'today' ? 'day' : view === 'week' ? 'week' : 'month'}! 🎉`
+              }
             </Typography>
           </CardContent>
         </Card>
@@ -369,7 +408,7 @@ const DailyScheduleView = () => {
           <Card key={key} sx={{ mb: 2 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom color="primary">
-                {view === 'today' ? key : createLocalDate(key).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                {key}
               </Typography>
               
               <List>
@@ -402,13 +441,13 @@ const DailyScheduleView = () => {
                                 label={item.activity.activity_name}
                                 sx={{ flexGrow: 1, minWidth: '200px' }}
                               />
-                              {view !== 'today' && (
-                                <Chip 
-                                  label={item.course.name}
-                                  size="small"
-                                  variant="outlined"
-                                />
-                              )}
+                              {/* Due date chip - shown in all views */}
+                              <Chip 
+                                label={createLocalDate(item.scheduled_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                size="small"
+                                variant="outlined"
+                                color={isOverdue(item.scheduled_date) ? "error" : "default"}
+                              />
                               {item.activity.is_exam && (
                                 <Chip 
                                   label="EXAM" 
